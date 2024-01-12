@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lost and Found It</title>
+    <style>
+      body {
+        background-color: darkblue;
+        color: white;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        padding: 20px;
+        text-align: center;
+      }
+
+      .logo {
+        font-size: 35px;
+        margin-top: 50px;
+        margin-bottom: 30px;
+      }
+
+      .insert-image-container {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 10px 15px;
+        background-color: darkblue;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        z-index: 999;
+      }
+
+      .insert-image-container:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+      }
+
+      .insert-image-container input {
+        display: none;
+      }
+
+      .insert-image-container label {
+        color: white;
+        font-weight: bold;
+      }
+
+      .search-bar {
+        margin-top: 30px;
+        margin-bottom: 20px;
+      }
+
+      .search-bar input[type="text"] {
+        border: none;
+        padding: 10px;
+        width: 300px;
+        font-size: 16px;
+        border-radius: 5px;
+        outline: none;
+      }
+
+      .search-bar button {
+        background-color: white;
+        border: none;
+        color: darkblue;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .search-results {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .search-results .result-container {
+        margin: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .search-results img {
+        max-width: 200px;
+        border-radius: 5px;
+      }
+
+      .search-results .caption {
+        margin-top: 10px;
+      }
+
+      .search-results a {
+        color: white;
+        text-decoration: none;
+      }
+
+      .search-results a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="logo">Lost and Found It</h1>
+
+      <div class="insert-image-container">
+        <input
+          type="file"
+          id="imageInput"
+          accept="image/*"
+          onchange="addImage()"
+        />
+        <label for="imageInput">Insert Image</label>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search Captions" />
+        <button onclick="searchCaptions()">Search</button>
+      </div>
+
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <script>
+      // Load saved images and captions from Local Storage on page load
+      window.onload = function () {
+        var savedData = JSON.parse(localStorage.getItem("captions"));
+        if (savedData) {
+          for (var i = 0; i < savedData.length; i++) {
+            createImageElement(savedData[i].imageUrl, savedData[i].caption);
+          }
+        }
+      };
+
+      function addImage() {
+        var fileInput = document.getElementById("imageInput");
+        var file = fileInput.files[0];
+
+        if (file) {
+          var reader = new FileReader();
+
+          reader.onload = function (e) {
+            var imageUrl = e.target.result;
+            var captionText = prompt("Enter the image caption:");
+
+            createImageElement(imageUrl, captionText);
+
+            // Save image and caption to Local Storage
+            var savedData = JSON.parse(localStorage.getItem("captions")) || [];
+            savedData.push({ imageUrl: imageUrl, caption: captionText });
+            localStorage.setItem("captions", JSON.stringify(savedData));
+          };
+
+          reader.readAsDataURL(file);
+        }
+      }
+
+      function createImageElement(imageUrl, captionText) {
+        var searchResultsElement = document.getElementById("searchResults");
+
+        var img = document.createElement("img");
+        img.src = imageUrl;
+        img.classList.add("result-image");
+
+        var caption = document.createElement("p");
+        caption.classList.add("caption");
+        caption.innerHTML = captionText;
+
+        var container = document.createElement("div");
+        container.classList.add("result-container");
+        container.appendChild(img);
+        container.appendChild(caption);
+
+        searchResultsElement.appendChild(container);
+      }
+
+      function searchCaptions() {
+        var searchQuery = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        var captions = document.getElementsByClassName("caption");
+
+        for (var i = 0; i < captions.length; i++) {
+          var caption = captions[i].textContent.toLowerCase();
+          var resultContainer = captions[i].parentNode;
+
+          if (caption.includes(searchQuery)) {
+            resultContainer.style.display = "block";
+          } else {
+            resultContainer.style.display = "none";
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
